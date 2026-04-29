@@ -15,8 +15,34 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
+    $user = auth()->user();
+
+    if ($user->hasRole('admin')) {
+        return redirect()->route('admin.dashboard');
+    } elseif ($user->hasRole('employer')) {
+        return redirect()->route('employer.dashboard');
+    } else {
+        return redirect()->route('candidate.dashboard');
+    }
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware(['auth', 'role:admin'])->prefix('/admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', function () {
+        return Inertia::render('Admin/Dashboard');
+    })->name('admin.dashboard');
+});
+
+Route::middleware(['auth', 'role:employer'])->prefix('/employer')->name('employer.')->group(function () {
+    Route::get('/dashboard', function () {
+        return Inertia::render('Employer/Dashboard');
+    })->name('employer.dashboard');
+});
+
+Route::middleware(['auth', 'role:candidate'])->prefix('/candidate')->name('candidate.')->group(function () {
+    Route::get('/dashboard', function () {
+        return Inertia::render('Candidate/Dashboard');
+    })->name('candidate.dashboard');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
