@@ -53,6 +53,72 @@ class JobPostingController extends Controller
         return redirect()->route('employer.jobs.index')->with('success', 'Job posted successfully and is pending approval.');
     }
 
+    public function show(Request $request, string $id) {
+        $job = JobPosting::with('category:id,name')
+            ->withCount('applications')
+            ->findOrFail($id);
+
+        if ($job->employer_id !== $request->user()->employer->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        return Inertia::render('Employer/JobPostings/Show', [
+            'job' => $job,
+        ]);
+    }
+
+
+    public function edit(Request $request, string $id) {
+        // Show form to edit an existing job posting
+        $job = JobPosting::findOrFail($id);
+
+        if ($job->employer_id !== $request->user()->employer->id) {
+            abort(403, 'Unauthorized action.');
+        }
+        $categories = Category::all();
+
+        return Inertia::render('Employer/JobPostings/Edit', [
+            'job' => $job,
+            'categories' => $categories,
+        ]);
+    }
+
+
+    public function update(Request $request, string $id) {
+        // Validate and update the existing job posting
+        $job = JobPosting::findOrFail($id);
+
+        if ($job->employer_id !== $request->user()->employer->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $data = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'salary_range' => 'nullable|string|max:255',
+            'location' => 'required|string|max:255',
+            'deadline' => 'required|date|after:today',
+            'type' => 'required|in:remote,on-site,hybrid',
+            'category_id' => 'required|exists:categories,id',
+        ]);
+
+        $job->update($data);
+
+        return redirect()->route('employer.jobs.index')->with('success', 'Job updated successfully.');
+    }
+
+    public function destroy(Request $request, string $id) {
+        // Delete a job posting
+        $job = JobPosting::findOrFail($id);
+
+        if ($job->employer_id !== $request->user()->employer->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $job->delete();
+
+        return redirect()->route('employer.jobs.index')->with('success', 'Job deleted successfully.');
+    }
 
 
 }

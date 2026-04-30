@@ -38,7 +38,7 @@ Route::middleware(['auth', 'role:employer'])->prefix('employer')->name('employer
         return Inertia::render('Employer/Dashboard');
     })->name('dashboard');
 
-    Route::resource('jobs', JobPostingController::class)->except(['show', 'edit', 'update', 'destroy']);
+    Route::resource('jobs', JobPostingController::class);
 });
 
 Route::middleware(['auth', 'role:candidate'])->prefix('candidate')->name('candidate.')->group(function () {
