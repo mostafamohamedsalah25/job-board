@@ -7,6 +7,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\Employer\JobPostingController;
 use App\Http\Controllers\Employer\DashboardController;
 use App\Http\Controllers\Employer\ApplicationController;
+use App\Http\Controllers\Employer\PaymentController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -41,6 +42,10 @@ Route::middleware(['auth', 'role:employer'])->prefix('employer')->name('employer
 
     Route::resource('jobs', JobPostingController::class);
     Route::patch('/applications/{id}/status', [ApplicationController::class, 'updateStatus'])->name('applications.status');
+
+    Route::get('/applications/{applicationId}/checkout', [PaymentController::class, 'checkout'])->name('payments.checkout');
+    Route::post('/applications/{applicationId}/pay', [PaymentController::class,'processPayment'])->name('payments.processPayment');
+
 });
 
 Route::middleware(['auth', 'role:candidate'])->prefix('candidate')->name('candidate.')->group(function () {

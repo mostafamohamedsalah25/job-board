@@ -119,7 +119,9 @@ const formatDate = (dateString) => {
                                     <tr v-for="application in job.applications" :key="application.id">
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="font-medium text-gray-900">{{ application.candidate.name }}</div>
-                                            <div class="text-sm text-gray-500">{{ application.candidate.email }}</div>
+                                            <div class="text-sm text-gray-500">
+                                                {{ application.is_paid ? application.candidate.email : '****@****.***' }}
+                                            </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             <p class="truncate w-48" :title="application.candidate.profile?.bio">
@@ -132,11 +134,28 @@ const formatDate = (dateString) => {
                                                 :class="{'bg-yellow-100 text-yellow-800': application.status === 'pending', 'bg-green-100 text-green-800': application.status === 'accepted', 'bg-red-100 text-red-800': application.status === 'rejected'}">
                                                 {{ application.status }}
                                             </span>
+                                            <span v-if="application.is_paid" class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                Paid
+                                            </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                            <!-- أزرار الموافقة والرفض (سنقوم ببرمجتها في الخطوة القادمة) -->
-                                            <Link :href="route('employer.applications.status', application.id)" method="patch" :data="{ status: 'accepted' }" as="button" class="text-green-600 hover:text-green-900">Accept</Link>
-                                            <Link :href="route('employer.applications.status', application.id)" method="patch" :data="{ status: 'rejected' }" as="button" class="text-red-600 hover:text-red-900">Reject</Link>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
+                                            <!-- إذا كانت الحالة Pending، نعرض أزرار الموافقة والرفض -->
+                                            <template v-if="application.status === 'pending'">
+                                                <Link :href="route('employer.applications.status', application.id)" method="patch" :data="{ status: 'accepted' }" as="button" class="text-green-600 hover:text-green-900">Accept</Link>
+                                                <Link :href="route('employer.applications.status', application.id)" method="patch" :data="{ status: 'rejected' }" as="button" class="text-red-600 hover:text-red-900">Reject</Link>
+                                            </template>
+
+                                            <!-- إذا كانت الحالة Accepted ولم يدفع بعد، نعرض زر الدفع -->
+                                            <template v-if="application.status === 'accepted' && !application.is_paid">
+                                                <Link :href="route('employer.payments.checkout', application.id)" class="inline-flex items-center px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+                                                    Pay to View Info
+                                                </Link>
+                                            </template>
+
+                                            <!-- إذا تم الدفع، يمكننا عرض زر للتواصل المباشر -->
+                                            <template v-if="application.is_paid">
+                                                <a :href="'mailto:' + application.candidate.email" class="text-indigo-600 hover:text-indigo-900 font-semibold">Contact Candidate</a>
+                                            </template>
                                         </td>
                                     </tr>
                                 </tbody>
