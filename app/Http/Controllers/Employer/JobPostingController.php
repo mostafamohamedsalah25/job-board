@@ -13,7 +13,10 @@ class JobPostingController extends Controller
     public function index(Request $request) {
         // List all job postings for the employer
         $employer = $request->user()->employer;
-        $jobs = $employer->jobPostings()->latest()->get();
+        $jobs = $employer->jobPostings()
+        ->with('category:id,name')
+        ->withCount('applications')
+        ->latest()->get();
 
         return Inertia::render('Employer/JobPostings/Index', [
             'jobs' => $jobs,
@@ -51,5 +54,5 @@ class JobPostingController extends Controller
     }
 
 
-    
+
 }
