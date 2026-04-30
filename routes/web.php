@@ -8,6 +8,7 @@ use App\Http\Controllers\Employer\JobPostingController;
 use App\Http\Controllers\Employer\DashboardController;
 use App\Http\Controllers\Employer\ApplicationController;
 use App\Http\Controllers\Employer\PaymentController;
+use App\Http\Controllers\Candidate\ProfileController as CandidateProfileController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -52,6 +53,9 @@ Route::middleware(['auth', 'role:candidate'])->prefix('candidate')->name('candid
     Route::get('/dashboard', function () {
         return Inertia::render('Candidate/Dashboard');
     })->name('dashboard');
+
+    Route::get('/profile', [CandidateProfileController::class, 'edit'])->name('profile.edit');
+    Route::post('/profile', [CandidateProfileController::class, 'update'])->name('profile.update');
 });
 
 Route::middleware('auth')->group(function () {

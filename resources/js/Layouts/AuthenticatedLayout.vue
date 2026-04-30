@@ -45,6 +45,10 @@ const showingNavigationDropdown = ref(false);
                                         :active="route().current('employer.jobs.*')">
                                     My Jobs
                                 </NavLink>
+
+                                <NavLink v-if="$page.props.auth.user.role === 'candidate' || route().current('candidate.*')" :href="route('candidate.profile.edit')" :active="route().current('candidate.profile.*')">
+                                    My Profile
+                                </NavLink>
                             </div>
                         </div>
 
