@@ -11,6 +11,7 @@ const form = useForm({
     email: '',
     password: '',
     password_confirmation: '',
+    role: 'candidate',
 });
 
 const submit = () => {
@@ -54,6 +55,20 @@ const submit = () => {
                 />
 
                 <InputError class="mt-2" :message="form.errors.email" />
+            </div>
+
+            <div class="mt-4">
+                <InputLabel for="role" value="Account Type" />
+                <select
+                    id="role"
+                    v-model="form.role"
+                    class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                    required
+                >
+                    <option value="candidate">Job Seeker (Candidate)</option>
+                    <option value="employer">Employer (Company)</option>
+                </select>
+                <InputError class="mt-2" :message="form.errors.role" />
             </div>
 
             <div class="mt-4">
