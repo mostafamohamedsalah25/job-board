@@ -5,6 +5,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\Employer\JobPostingController;
+use App\Http\Controllers\Employer\DashboardController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -34,9 +35,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 });
 
 Route::middleware(['auth', 'role:employer'])->prefix('employer')->name('employer.')->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Employer/Dashboard');
-    })->name('dashboard');
+
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('jobs', JobPostingController::class);
 });
