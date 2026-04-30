@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\Employer\JobPostingController;
 use App\Http\Controllers\Employer\DashboardController;
+use App\Http\Controllers\Employer\ApplicationController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -39,6 +40,7 @@ Route::middleware(['auth', 'role:employer'])->prefix('employer')->name('employer
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('jobs', JobPostingController::class);
+    Route::patch('/applications/{id}/status', [ApplicationController::class, 'updateStatus'])->name('applications.status');
 });
 
 Route::middleware(['auth', 'role:candidate'])->prefix('candidate')->name('candidate.')->group(function () {

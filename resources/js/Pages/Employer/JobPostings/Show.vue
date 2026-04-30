@@ -96,6 +96,53 @@ const formatDate = (dateString) => {
                         </div>
                     </div>
 
+                    <div class="mt-12 border-t pt-8">
+                        <h3 class="text-xl font-bold text-gray-900 mb-6">Candidates Applications</h3>
+
+                        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Candidate Name</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bio / LinkedIn</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr v-if="job.applications && job.applications.length === 0">
+                                        <td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                            No candidates have applied to this job yet.
+                                        </td>
+                                    </tr>
+
+                                    <tr v-for="application in job.applications" :key="application.id">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="font-medium text-gray-900">{{ application.candidate.name }}</div>
+                                            <div class="text-sm text-gray-500">{{ application.candidate.email }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <p class="truncate w-48" :title="application.candidate.profile?.bio">
+                                                {{ application.candidate.profile?.bio || 'No bio provided' }}
+                                            </p>
+                                            <a v-if="application.candidate.profile?.linkedin_id" :href="application.candidate.profile.linkedin_id" target="_blank" class="text-blue-500 hover:underline text-xs">LinkedIn Profile</a>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full capitalize"
+                                                :class="{'bg-yellow-100 text-yellow-800': application.status === 'pending', 'bg-green-100 text-green-800': application.status === 'accepted', 'bg-red-100 text-red-800': application.status === 'rejected'}">
+                                                {{ application.status }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                                            <!-- أزرار الموافقة والرفض (سنقوم ببرمجتها في الخطوة القادمة) -->
+                                            <Link :href="route('employer.applications.status', application.id)" method="patch" :data="{ status: 'accepted' }" as="button" class="text-green-600 hover:text-green-900">Accept</Link>
+                                            <Link :href="route('employer.applications.status', application.id)" method="patch" :data="{ status: 'rejected' }" as="button" class="text-red-600 hover:text-red-900">Reject</Link>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

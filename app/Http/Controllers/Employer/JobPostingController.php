@@ -54,7 +54,10 @@ class JobPostingController extends Controller
     }
 
     public function show(Request $request, string $id) {
-        $job = JobPosting::with('category:id,name')
+        $job = JobPosting::with([
+                'category:id,name',
+                'applications.candidate.profile'
+            ])
             ->withCount('applications')
             ->findOrFail($id);
 

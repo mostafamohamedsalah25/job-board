@@ -39,6 +39,12 @@ const showingNavigationDropdown = ref(false);
                                 >
                                     Dashboard
                                 </NavLink>
+
+                                <NavLink v-if="$page.props.auth.user.role === 'employer' || route().current('employer.*')"
+                                        :href="route('employer.jobs.index')"
+                                        :active="route().current('employer.jobs.*')">
+                                    My Jobs
+                                </NavLink>
                             </div>
                         </div>
 

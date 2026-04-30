@@ -80,6 +80,9 @@ const statusClasses = (status) => {
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <Link :href="route('employer.jobs.show', job.id)" class="text-blue-600 hover:text-blue-900 mr-3 font-bold">
+                                            View
+                                        </Link>
                                         <Link :href="route('employer.jobs.edit', job.id)" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</Link>
 
                                         <Link :href="route('employer.jobs.destroy', job.id)" method="delete" as="button" type="button" class="text-red-600 hover:text-red-900" preserve-scroll onclick="return confirm('Are you sure you want to delete this job?')">
