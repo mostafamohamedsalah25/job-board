@@ -55,6 +55,12 @@ const showingNavigationDropdown = ref(false);
                                         :active="route().current('candidate.jobs.*')">
                                     Browse Jobs
                                 </NavLink>
+
+                                <NavLink v-if="$page.props.auth.user.role === 'candidate' || route().current('candidate.*')"
+                                        :href="route('candidate.applications.index')"
+                                        :active="route().current('candidate.applications.*')">
+                                    My Applications
+                                </NavLink>
                             </div>
                         </div>
 
