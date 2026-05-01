@@ -1,17 +1,18 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import Badge from '@/Components/UI/Badge.vue';
 import { Head, Link } from '@inertiajs/vue3';
 
 defineProps({
     jobs: Object,
 });
 
-const statusClasses = (status) => {
-    return {
-        'bg-yellow-100 text-yellow-800': status === 'pending',
-        'bg-green-100 text-green-800': status === 'approved',
-        'bg-red-100 text-red-800': status === 'rejected',
-    };
+// دالة لتحويل حالة الوظيفة إلى نوع الـ Badge المناسب
+const getStatusType = (status) => {
+    if (status === 'pending') return 'warning';
+    if (status === 'approved') return 'success';
+    if (status === 'rejected') return 'danger';
+    return 'default';
 };
 </script>
 
@@ -20,67 +21,82 @@ const statusClasses = (status) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Admin Dashboard - Job Approvals</h2>
+            <div>
+                <h2 class="font-display text-2xl font-bold text-primary">Admin Dashboard</h2>
+                <p class="text-sm text-on-surface-variant mt-1">Review and manage pending job postings.</p>
+            </div>
         </template>
 
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="space-y-6 mt-6">
+            <!-- رسائل النجاح -->
+            <div v-if="$page.props.flash && $page.props.flash.success" class="px-4 py-3 bg-green-50 text-green-700 rounded-lg border border-green-100 flex items-center gap-2 font-medium shadow-sm">
+                <span class="material-symbols-outlined">check_circle</span>
+                {{ $page.props.flash.success }}
+            </div>
 
-                <div v-if="$page.props.flash && $page.props.flash.success" class="mb-4 px-4 py-3 bg-green-100 text-green-700 rounded border border-green-200">
-                    {{ $page.props.flash.success }}
+            <!-- جدول الوظائف -->
+            <div class="bg-white rounded-xl shadow-sm border border-outline overflow-hidden">
+                <div class="p-6 border-b border-outline flex justify-between items-center bg-slate-50/50">
+                    <h3 class="font-display text-lg font-bold text-primary">Pending Jobs Approval</h3>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900 overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job / Company</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Posted</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                <tr v-for="job in jobs.data" :key="job.id" :class="{'bg-yellow-50': job.status === 'pending'}">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="font-medium text-gray-900">{{ job.title }}</div>
-                                        <div class="text-sm text-gray-500">{{ job.employer?.company_name }}</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {{ new Date(job.created_at).toLocaleDateString() }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span :class="['px-2 inline-flex text-xs leading-5 font-semibold rounded-full capitalize', statusClasses(job.status)]">
-                                            {{ job.status }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-
-                                        <!-- زر الموافقة -->
-                                        <Link v-if="job.status !== 'approved'" :href="route('admin.jobs.status', job.id)" method="patch" :data="{ status: 'approved' }" as="button" class="inline-flex items-center px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-xs transition">
-                                            Approve
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-outline-variant text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                <th class="px-6 py-4">Job / Company</th>
+                                <th class="px-6 py-4">Date Posted</th>
+                                <th class="px-6 py-4">Status</th>
+                                <th class="px-6 py-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-sm">
+                            <tr v-if="jobs.data.length === 0">
+                                <td colspan="4" class="px-6 py-12 text-center text-slate-500 font-medium">
+                                    No jobs currently require approval.
+                                </td>
+                            </tr>
+                            <tr v-for="job in jobs.data" :key="job.id" class="hover:bg-slate-50/50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-primary text-base">{{ job.title }}</div>
+                                    <div class="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[14px]">business</span>
+                                        {{ job.employer?.company_name || 'Unknown' }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">
+                                    {{ new Date(job.created_at).toLocaleDateString() }}
+                                </td>
+                                <td class="px-6 py-4">
+                                    <Badge :type="getStatusType(job.status)" class="capitalize">
+                                        {{ job.status }}
+                                    </Badge>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex justify-end gap-2">
+                                        <!-- زر الموافقة (أيقونة) -->
+                                        <Link v-if="job.status !== 'approved'" :href="route('admin.jobs.status', job.id)" method="patch" :data="{ status: 'approved' }" as="button" class="p-1.5 text-slate-400 hover:text-green-600 transition-colors bg-white border border-slate-200 rounded shadow-sm hover:shadow" title="Approve">
+                                            <span class="material-symbols-outlined text-[20px]">check_circle</span>
                                         </Link>
 
-                                        <!-- زر الرفض -->
-                                        <Link v-if="job.status !== 'rejected'" :href="route('admin.jobs.status', job.id)" method="patch" :data="{ status: 'rejected' }" as="button" class="inline-flex items-center px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-xs transition">
-                                            Reject
+                                        <!-- زر الرفض (أيقونة) -->
+                                        <Link v-if="job.status !== 'rejected'" :href="route('admin.jobs.status', job.id)" method="patch" :data="{ status: 'rejected' }" as="button" class="p-1.5 text-slate-400 hover:text-red-600 transition-colors bg-white border border-slate-200 rounded shadow-sm hover:shadow" title="Reject">
+                                            <span class="material-symbols-outlined text-[20px]">cancel</span>
                                         </Link>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
-                        <!-- Pagination -->
-                        <div v-if="jobs.links" class="mt-6">
-                            <div class="flex flex-wrap gap-1">
-                                <template v-for="(link, index) in jobs.links" :key="index">
-                                    <div v-if="link.url === null" class="px-4 py-2 border rounded text-gray-400 bg-gray-50 text-sm" v-html="link.label"></div>
-                                    <Link v-else :href="link.url" class="px-4 py-2 border rounded hover:bg-gray-100 text-sm" :class="{ 'bg-indigo-600 text-white hover:bg-indigo-700 border-indigo-600': link.active }" v-html="link.label"></Link>
-                                </template>
-                            </div>
-                        </div>
-
+                <!-- Pagination -->
+                <div v-if="jobs.links && jobs.links.length > 3" class="p-4 border-t border-outline flex justify-center bg-slate-50">
+                    <div class="flex flex-wrap gap-1">
+                        <template v-for="(link, index) in jobs.links" :key="index">
+                            <div v-if="link.url === null" class="px-3 py-1 border border-outline-variant rounded text-slate-400 bg-white text-sm" v-html="link.label"></div>
+                            <Link v-else :href="link.url" class="px-3 py-1 border rounded text-sm transition-colors" :class="{ 'bg-secondary text-white border-secondary font-bold': link.active, 'bg-white border-outline-variant text-slate-600 hover:bg-slate-50': !link.active }" v-html="link.label"></Link>
+                        </template>
                     </div>
                 </div>
             </div>
