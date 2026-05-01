@@ -8,6 +8,7 @@ import { Head, useForm, usePage } from '@inertiajs/vue3';
 
 const props = defineProps({
     profile: Object,
+    skills: Array, // أضفنا مصفوفة المهارات القادمة من الكنترولر
 });
 
 const user = usePage().props.auth.user;
@@ -16,6 +17,8 @@ const form = useForm({
     phone: props.profile?.phone || '',
     bio: props.profile?.bio || '',
     linkedin_id: props.profile?.linkedin_id && props.profile.linkedin_id.startsWith('http') ? props.profile.linkedin_id : '',
+    // سحب الـ IDs الخاصة بالمهارات المحفوظة مسبقاً (إن وجدت)
+    skills: props.profile?.skills?.map(skill => skill.id) || [],
     resume: null,
     _method: 'POST',
 });
@@ -42,6 +45,10 @@ const submit = () => {
             <div v-if="$page.props.flash && $page.props.flash.success" class="mb-6 px-4 py-3 bg-green-50 text-green-700 rounded-lg border border-green-100 flex items-center gap-2 font-medium shadow-sm">
                 <span class="material-symbols-outlined">check_circle</span>
                 {{ $page.props.flash.success }}
+            </div>
+            <div v-if="$page.props.flash && $page.props.flash.error" class="mb-6 px-4 py-3 bg-red-50 text-red-700 rounded-lg border border-red-100 flex items-center gap-2 font-medium shadow-sm">
+                <span class="material-symbols-outlined">error</span>
+                {{ $page.props.flash.error }}
             </div>
 
             <div class="bg-white overflow-hidden shadow-sm border border-outline sm:rounded-xl p-8">
@@ -82,6 +89,22 @@ const submit = () => {
                         <InputError class="mt-2" :message="form.errors.bio"/>
                     </div>
 
+                    <!-- Skills (القسم الجديد المضاف) -->
+                    <div class="border-t border-outline-variant pt-6 mt-6">
+                        <InputLabel value="Your Skills" class="font-display text-lg font-bold text-primary mb-3"/>
+                        <p class="text-xs text-on-surface-variant mb-4">Select the skills that best match your expertise. Employers use these to find you!</p>
+
+                        <div class="flex flex-wrap gap-3">
+                            <label v-for="skill in skills" :key="skill.id" class="cursor-pointer relative">
+                                <input type="checkbox" :value="skill.id" v-model="form.skills" class="peer sr-only" />
+                                <span class="inline-flex items-center px-4 py-2 rounded-full border border-outline-variant text-sm font-medium text-on-surface-variant peer-checked:bg-secondary peer-checked:text-white peer-checked:border-secondary transition-all hover:bg-slate-50 peer-checked:hover:bg-orange-600 shadow-sm">
+                                    {{ skill.name }}
+                                </span>
+                            </label>
+                        </div>
+                        <InputError class="mt-2" :message="form.errors.skills"/>
+                    </div>
+
                     <!-- Resume Upload -->
                     <div class="border-t border-outline-variant pt-6 mt-6">
                         <InputLabel for="resume" value="Upload Resume (PDF only, Max 2MB)" class="font-bold text-primary mb-2"/>
@@ -104,6 +127,24 @@ const submit = () => {
                         <InputError class="mt-2" :message="form.errors.resume"/>
                         <progress v-if="form.progress" :value="form.progress.percentage" max="100" class="mt-2 w-full h-1.5 rounded bg-slate-200 accent-secondary">
                         </progress>
+                    </div>
+
+                    <!-- Social Connections -->
+                    <div class="border-t border-outline-variant pt-6 mt-6 mb-6">
+                        <h3 class="font-display text-lg font-bold text-primary mb-4">Social Connections</h3>
+
+                        <div v-if="profile?.linkedin_id" class="flex items-center text-green-700 bg-green-50 px-4 py-3 rounded-lg border border-green-200 w-fit font-semibold text-sm shadow-sm">
+                            <span class="material-symbols-outlined text-[20px] mr-2">check_circle</span>
+                            LinkedIn Profile Connected
+                        </div>
+
+                        <div v-else class="flex flex-col items-start gap-2">
+                            <a :href="route('candidate.linkedin.redirect')" class="inline-flex items-center px-6 py-2.5 bg-[#0077b5] text-white rounded-lg hover:bg-[#005e93] transition-all font-bold shadow-sm active:scale-95">
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                                Connect with LinkedIn
+                            </a>
+                            <p class="text-xs text-on-surface-variant mt-1">Connecting your LinkedIn profile increases your chances of being hired by verifying your professional identity.</p>
+                        </div>
                     </div>
 
                     <!-- Submit -->
