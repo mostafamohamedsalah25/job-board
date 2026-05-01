@@ -11,6 +11,7 @@ use App\Http\Controllers\Employer\PaymentController;
 use App\Http\Controllers\Candidate\ProfileController as CandidateProfileController;
 use App\Http\Controllers\Candidate\JobController as CandidateJobController;
 use App\Http\Controllers\Candidate\ApplicationController as CandidateAppController;
+use App\Http\Controllers\Candidate\LinkedInController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -65,6 +66,10 @@ Route::middleware(['auth', 'role:candidate'])->prefix('candidate')->name('candid
 
     Route::get('/applications', [CandidateAppController::class, 'index'])->name('applications.index');
     Route::delete('/applications/{application}', [CandidateAppController::class, 'destroy'])->name('applications.destroy');
+
+    // LinkedIn OAuth Routes
+    Route::get('/linkedin/redirect', [LinkedInController::class, 'redirectToLinkedIn'])->name('linkedin.redirect');
+    Route::get('/linkedin/callback', [LinkedInController::class, 'handleLinkedInCallback'])->name('linkedin.callback');
 });
 
 Route::middleware('auth')->group(function () {
