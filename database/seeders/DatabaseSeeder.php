@@ -64,7 +64,10 @@ class DatabaseSeeder extends Seeder
         $employers = [];
         // إنشاء 30 حساب شركة
         for ($i = 0; $i < 30; $i++) {
-            $user = User::factory()->create();
+            // تثبيت الباسورد هنا لجميع الشركات
+            $user = User::factory()->create([
+                'password' => bcrypt('password')
+            ]);
             $user->assignRole($employerRole);
 
             $employer = Employer::create([
@@ -93,7 +96,10 @@ class DatabaseSeeder extends Seeder
 
         // إنشاء 100 موظف عشوائي
         for ($i = 0; $i < 100; $i++) {
-            $user = User::factory()->create();
+            // تثبيت الباسورد هنا لجميع الموظفين
+            $user = User::factory()->create([
+                'password' => bcrypt('password')
+            ]);
             $user->assignRole($candidateRole);
 
             $profile = Profile::create([
@@ -179,6 +185,6 @@ class DatabaseSeeder extends Seeder
         // إعادة تشغيل حماية الحقول
         Model::reguard();
 
-        $this->command->info('Awesome! Database is fully seeded with realistic Job Board data. 🎉');
+        $this->command->info('Awesome! Database is fully seeded with realistic Job Board data.');
     }
 }
