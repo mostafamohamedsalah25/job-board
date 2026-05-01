@@ -48,4 +48,30 @@ class JobPosting extends Model
     public function comments(): HasMany {
         return $this->hasMany(Comment::class);
     }
+
+    public function scopeFilter($query, array $filters)
+    {
+        // البحث بالكلمات (في العنوان أو الوصف)
+        $query->when($filters['search'] ?? false, function ($query, $search) {
+            $query->where(function ($query) use ($search) {
+                $query->where('title', 'like', '%' . $search . '%')
+                      ->orWhere('description', 'like', '%' . $search . '%');
+            });
+        });
+
+        // الفلترة بالمدينة (Location)
+        $query->when($filters['location'] ?? false, function ($query, $location) {
+            $query->where('location', 'like', '%' . $location . '%');
+        });
+
+        // الفلترة بنوع العمل (Remote, On-site, Hybrid)
+        $query->when($filters['type'] ?? false, function ($query, $type) {
+            $query->where('type', $type);
+        });
+
+        // الفلترة بالتصنيف
+        $query->when($filters['category_id'] ?? false, function ($query, $category) {
+            $query->where('category_id', $category);
+        });
+    }
 }

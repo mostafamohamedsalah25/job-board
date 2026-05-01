@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\JobPosting;
 use App\Models\Application;
+use App\Models\Category;
 use Inertia\Inertia;
 
 
@@ -13,14 +14,22 @@ class JobController extends Controller
 {
     public function index(Request $request)
     {
+        $filters = $request->only(['search', 'location', 'type', 'category_id']);
+
         $jobs = JobPosting::with(['employer', 'category'])
             ->where('status', 'approved')
             ->where('is_active', true)
+            ->filter($filters)
             ->latest()
-            ->get();
+            ->paginate(9)
+            ->withQueryString();
+
+        $categories = Category::select('id', 'name')->get();
 
         return Inertia::render('Candidate/Jobs/Index', [
-            'jobs' => $jobs
+            'jobs' => $jobs,
+            'filters' => $filters,
+            'categories' => $categories
         ]);
     }
 
