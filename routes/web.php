@@ -15,6 +15,7 @@ use App\Http\Controllers\Candidate\LinkedInController;
 use App\Http\Controllers\Employer\CandidateSearchController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\Candidate\DashboardController as CandidateDashboardController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -60,9 +61,7 @@ Route::middleware(['auth', 'role:employer'])->prefix('employer')->name('employer
 });
 
 Route::middleware(['auth', 'role:candidate'])->prefix('candidate')->name('candidate.')->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Candidate/Dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [CandidateDashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/profile', [CandidateProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile', [CandidateProfileController::class, 'update'])->name('profile.update');
