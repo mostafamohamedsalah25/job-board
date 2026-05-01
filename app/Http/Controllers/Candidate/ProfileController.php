@@ -28,7 +28,7 @@ class ProfileController extends Controller
         ]);
 
         $profile = $request->user()->profile;
-        $data = $request->only(['phone', 'bio']);
+        $data = $request->only(['phone', 'bio', 'linkedin_id']);
 
         if ($request->hasFile('resume')) {
             if ($profile->resume_path) {
