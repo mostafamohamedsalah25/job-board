@@ -13,6 +13,7 @@ use App\Http\Controllers\Candidate\JobController as CandidateJobController;
 use App\Http\Controllers\Candidate\ApplicationController as CandidateAppController;
 use App\Http\Controllers\Candidate\LinkedInController;
 use App\Http\Controllers\Employer\CandidateSearchController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -36,9 +37,9 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Admin/Dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    Route::patch('/jobs/{id}/status', [AdminDashboardController::class, 'updateJobStatus'])->name('jobs.status');
 });
 
 Route::middleware(['auth', 'role:employer'])->prefix('employer')->name('employer.')->group(function () {
