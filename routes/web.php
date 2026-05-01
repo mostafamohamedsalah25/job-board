@@ -14,6 +14,7 @@ use App\Http\Controllers\Candidate\ApplicationController as CandidateAppControll
 use App\Http\Controllers\Candidate\LinkedInController;
 use App\Http\Controllers\Employer\CandidateSearchController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\CommentController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -40,6 +41,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     Route::patch('/jobs/{id}/status', [AdminDashboardController::class, 'updateJobStatus'])->name('jobs.status');
+    Route::patch('/comments/{comment}/toggle-visibility', [CommentController::class, 'toggleHidden'])->name('comments.toggle');
 });
 
 Route::middleware(['auth', 'role:employer'])->prefix('employer')->name('employer.')->group(function () {
@@ -81,6 +83,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::post('/jobs/{jobPosting}/comments', [CommentController::class, 'store'])->name('comments.store');
 });
 
 

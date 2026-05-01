@@ -78,5 +78,55 @@ defineProps({
                 </div>
             </div>
         </div>
+
+        <!-- قسم التعليقات -->
+        <div class="mt-12 border-t pt-8 max-w-4xl mx-auto sm:px-6 lg:px-8">
+            <h3 class="text-xl font-bold text-gray-900 mb-6">Questions & Comments</h3>
+
+            <!-- فورم إضافة تعليق -->
+            <div class="bg-gray-50 p-4 rounded-lg mb-8 border">
+                <form @submit.prevent="router.post(route('comments.store', job.id), { body: newComment }, { preserveScroll: true, onSuccess: () => newComment = '' })">
+                    <textarea v-model="newComment" rows="3" class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Ask a question about this job..."></textarea>
+                    <div class="mt-2 flex justify-end">
+                        <button type="submit" :disabled="!newComment" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50">Post Comment</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- عرض التعليقات -->
+            <div class="space-y-6">
+                <div v-if="!job.comments || job.comments.length === 0" class="text-gray-500 italic text-sm">
+                    No comments yet. Be the first to ask!
+                </div>
+
+                <div v-for="comment in job.comments" :key="comment.id" class="bg-white p-4 rounded-lg border shadow-sm">
+                    <!-- إذا كان التعليق مخفياً والمستخدم الحالي ليس مديراً -->
+                    <div v-if="comment.is_hidden && $page.props.auth.user.role !== 'admin'" class="text-gray-400 italic text-sm">
+                        This comment has been hidden by a moderator.
+                    </div>
+
+                    <div v-else>
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <span class="font-bold text-gray-900 text-sm">{{ comment.user.name }}</span>
+                                <span class="text-gray-500 text-xs ml-2">{{ new Date(comment.created_at).toLocaleDateString() }}</span>
+                            </div>
+
+                            <!-- زر الإخفاء/الإظهار (يظهر للمدير فقط) -->
+                            <button v-if="$page.props.auth.user.role === 'admin'"
+                                    @click="router.patch(route('admin.comments.toggle', comment.id), {}, { preserveScroll: true })"
+                                    class="text-xs font-bold px-2 py-1 rounded"
+                                    :class="comment.is_hidden ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
+                                {{ comment.is_hidden ? 'Unhide' : 'Hide' }}
+                            </button>
+                        </div>
+
+                        <p class="text-gray-700 text-sm" :class="{'opacity-50 line-through': comment.is_hidden}">
+                            {{ comment.body }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </AuthenticatedLayout>
 </template>

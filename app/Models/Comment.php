@@ -10,9 +10,16 @@ class Comment extends Model
     protected $fillable = [
         'job_posting_id',
         'user_id',
-        'body'
+        'body',
+        'is_hidden',
     ];
 
+    protected function casts(): array {
+        return [
+            'is_hidden' => 'boolean',
+        ];
+    }
+    
     public function jobPosting(): BelongsTo {
         return $this->belongsTo(JobPosting::class);
     }

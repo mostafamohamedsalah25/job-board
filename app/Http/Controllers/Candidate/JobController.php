@@ -35,7 +35,7 @@ class JobController extends Controller
 
     public function show(Request $request, string $id)
     {
-        $job = JobPosting::with(['employer', 'category'])
+        $job = JobPosting::with(['employer', 'category', 'comments.user'])
             ->where('status', 'approved')
             ->findOrFail($id);
 
