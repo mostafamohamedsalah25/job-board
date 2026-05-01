@@ -12,6 +12,7 @@ use App\Http\Controllers\Candidate\ProfileController as CandidateProfileControll
 use App\Http\Controllers\Candidate\JobController as CandidateJobController;
 use App\Http\Controllers\Candidate\ApplicationController as CandidateAppController;
 use App\Http\Controllers\Candidate\LinkedInController;
+use App\Http\Controllers\Employer\CandidateSearchController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -49,8 +50,9 @@ Route::middleware(['auth', 'role:employer'])->prefix('employer')->name('employer
 
     Route::get('/applications/{applicationId}/checkout', [PaymentController::class, 'checkout'])->name('payments.checkout');
     Route::post('/applications/{applicationId}/pay', [PaymentController::class,'processPayment'])->name('payments.processPayment');
-
     Route::get('/applications/{applicationId}/payment/success', [PaymentController::class, 'success'])->name('payments.success');
+
+    Route::get('/candidates/search', [CandidateSearchController::class, 'index'])->name('candidates.search');
 
 });
 
