@@ -16,6 +16,7 @@ const user = usePage().props.auth.user;
 const form = useForm({
     phone: props.profile?.phone || '',
     bio: props.profile?.bio || '',
+    linkedin_id: props.profile?.linkedin_id && props.profile.linkedin_id.startsWith('http') ? props.profile.linkedin_id : '', // جلب الرابط لو موجود
     resume: null, // الحقل المخصص للملف
     _method: 'POST', // طريقة الإرسال
 });
@@ -60,6 +61,13 @@ const submit = () => {
                             <InputError class="mt-2" :message="form.errors.phone"/>
                         </div>
 
+                        <!-- LinkedIn URL -->
+                        <div class="mt-4">
+                            <InputLabel for="linkedin_id" value="LinkedIn Profile URL" />
+                            <TextInput id="linkedin_id" type="url" class="mt-1 block w-full" v-model="form.linkedin_id" placeholder="https://www.linkedin.com/in/your-profile-name" />
+                            <InputError class="mt-2" :message="form.errors.linkedin_id" />
+                        </div>
+                        
                         <!-- Bio -->
                         <div>
                             <InputLabel for="bio" value="Professional Summary (Bio)"/>
@@ -110,7 +118,7 @@ const submit = () => {
                                 <p class="text-xs text-gray-500 mt-2">Connecting your LinkedIn profile increases your chances of being hired.</p>
                             </div>
                         </div>
-                        
+
                         <!-- Submit -->
                         <div class="flex items-center justify-end mt-4">
                             <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">

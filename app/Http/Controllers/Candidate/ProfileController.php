@@ -23,6 +23,7 @@ class ProfileController extends Controller
         $request->validate([
             'phone' => 'nullable|string|max:20',
             'bio' => 'nullable|string|max:1000',
+            'linkedin_id' => 'nullable|url|max:255',
             'resume' => 'nullable|mimes:pdf|max:2048',
         ]);
 

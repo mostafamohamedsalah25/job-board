@@ -127,7 +127,12 @@ const formatDate = (dateString) => {
                                             <p class="truncate w-48" :title="application.candidate.profile?.bio">
                                                 {{ application.candidate.profile?.bio || 'No bio provided' }}
                                             </p>
-                                            <a v-if="application.candidate.profile?.linkedin_id" :href="application.candidate.profile.linkedin_id" target="_blank" class="text-blue-500 hover:underline text-xs">LinkedIn Profile</a>
+                                            <a v-if="application.candidate.profile?.linkedin_id && application.candidate.profile.linkedin_id.startsWith('http')"
+                                            :href="application.candidate.profile.linkedin_id"
+                                            target="_blank"
+                                            class="text-blue-500 hover:underline text-xs font-semibold">
+                                            View LinkedIn Profile
+                                            </a>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full capitalize"
@@ -140,9 +145,9 @@ const formatDate = (dateString) => {
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
                                             <!-- إذا كانت الحالة Pending، نعرض أزرار الموافقة والرفض -->
-                                            <template v-if="application.status === 'pending'">
-                                                <Link :href="route('employer.applications.status', application.id)" method="patch" :data="{ status: 'accepted' }" as="button" class="text-green-600 hover:text-green-900">Accept</Link>
-                                                <Link :href="route('employer.applications.status', application.id)" method="patch" :data="{ status: 'rejected' }" as="button" class="text-red-600 hover:text-red-900">Reject</Link>
+                                            <<template v-if="application.status === 'pending'">
+                                                <Link :href="route('employer.applications.status', { id: application.id })" method="patch" :data="{ status: 'accepted' }" as="button" class="text-green-600 hover:text-green-900">Accept</Link>
+                                                <Link :href="route('employer.applications.status', { id: application.id })" method="patch" :data="{ status: 'rejected' }" as="button" class="text-red-600 hover:text-red-900">Reject</Link>
                                             </template>
 
                                             <!-- إذا كانت الحالة Accepted ولم يدفع بعد، نعرض زر الدفع -->
