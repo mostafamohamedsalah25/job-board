@@ -1,16 +1,16 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import Badge from '@/Components/UI/Badge.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { reactive, watch } from 'vue';
 import debounce from 'lodash/debounce';
 
 const props = defineProps({
-    jobs: Object, // أصبح Object بسبب الـ Pagination
+    jobs: Object,
     filters: Object,
     categories: Array,
 });
 
-// تجهيز متغيرات الفلترة بقيمها القادمة من الـ URL (إن وجدت)
 const searchForm = reactive({
     search: props.filters?.search || '',
     location: props.filters?.location || '',
@@ -18,20 +18,15 @@ const searchForm = reactive({
     category_id: props.filters?.category_id || '',
 });
 
-// مراقبة أي تغيير في الفلاتر لإرسال طلب تلقائي
 watch(
     searchForm,
     debounce((value) => {
         router.get(
             route('candidate.jobs.index'),
             value,
-            {
-                preserveState: true, // الحفاظ على حالة الصفحة (لا يتم مسح ما يكتبه المستخدم)
-                preserveScroll: true, // عدم رفع الشاشة لأعلى بعد جلب النتائج
-                replace: true, // استبدال الرابط في الـ History لتجنب زحمة الـ Back button
-            }
+            { preserveState: true, preserveScroll: true, replace: true }
         );
-    }, 300) // تأخير 300 ملي ثانية حتى ينتهي المستخدم من الكتابة
+    }, 300)
 );
 </script>
 
@@ -40,95 +35,126 @@ watch(
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Browse Available Jobs</h2>
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4">
+                <div>
+                    <h1 class="font-display text-2xl font-bold text-primary">Find Your Next Role</h1>
+                    <p class="font-body-sm text-on-surface-variant mt-1">Showing {{ jobs.total || 0 }} available opportunities</p>
+                </div>
+            </div>
         </template>
 
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <div class="flex flex-col lg:flex-row gap-8 mt-6">
 
-                <!-- 1. شريط البحث والفلاتر (Live Filters) -->
-                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-
-                        <!-- Search Keyword -->
-                        <div>
-                            <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Keywords</label>
-                            <input id="search" v-model="searchForm.search" type="text" placeholder="Job title or skill..." class="w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                        </div>
-
-                        <!-- Location -->
-                        <div>
-                            <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                            <input id="location" v-model="searchForm.location" type="text" placeholder="City or country..." class="w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                        </div>
-
-                        <!-- Category -->
-                        <div>
-                            <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                            <select id="category" v-model="searchForm.category_id" class="w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                <option value="">All Categories</option>
-                                <option v-for="category in categories" :key="category.id" :value="category.id">
-                                    {{ category.name }}
-                                </option>
-                            </select>
-                        </div>
-
-                        <!-- Work Type -->
-                        <div>
-                            <label for="type" class="block text-sm font-medium text-gray-700 mb-1">Work Type</label>
-                            <select id="type" v-model="searchForm.type" class="w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                <option value="">All Types</option>
-                                <option value="on-site">On-site</option>
-                                <option value="remote">Remote</option>
-                                <option value="hybrid">Hybrid</option>
-                            </select>
-                        </div>
-
-                    </div>
+            <!-- Sidebar Filters -->
+            <aside class="w-full lg:w-64 shrink-0 space-y-8 bg-white p-6 rounded-xl border border-outline shadow-sm h-fit">
+                <div class="flex items-center justify-between">
+                    <h2 class="font-display text-lg font-bold text-primary">Filters</h2>
+                    <Link :href="route('candidate.jobs.index')" class="text-xs font-semibold text-secondary hover:underline">Clear</Link>
                 </div>
 
-                <!-- 2. قائمة الوظائف (نستخدم jobs.data بسبب الـ Pagination) -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-                    <div v-if="jobs.data.length === 0" class="col-span-full text-center py-12 bg-white rounded-lg shadow-sm text-gray-500">
-                        No jobs match your search criteria. Try adjusting your filters.
+                <div class="space-y-6">
+                    <!-- Keywords -->
+                    <div>
+                        <label class="font-semibold text-sm text-primary mb-2 block">Keywords</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+                            <input type="text" v-model="searchForm.search" placeholder="Job title, skill..." class="w-full pl-10 pr-3 py-2 bg-slate-50 border border-outline-variant rounded-lg text-sm focus:border-secondary focus:ring-1 focus:ring-secondary transition-colors">
+                        </div>
                     </div>
 
-                    <!-- كارت الوظيفة -->
-                    <div v-for="job in jobs.data" :key="job.id" class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border hover:border-indigo-500 transition duration-150 flex flex-col justify-between">
-                        <div>
-                            <div class="flex justify-between items-start mb-4">
-                                <div>
-                                    <h3 class="text-lg font-bold text-gray-900 line-clamp-1" :title="job.title">{{ job.title }}</h3>
-                                    <p class="text-sm text-indigo-600 font-semibold">{{ job.employer?.company_name || 'Unknown Company' }}</p>
-                                </div>
-                                <span class="px-2 py-1 bg-gray-100 text-xs text-gray-600 rounded capitalize">{{ job.type }}</span>
-                            </div>
+                    <!-- Location -->
+                    <div>
+                        <label class="font-semibold text-sm text-primary mb-2 block">Location</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">location_on</span>
+                            <input type="text" v-model="searchForm.location" placeholder="City or country" class="w-full pl-10 pr-3 py-2 bg-slate-50 border border-outline-variant rounded-lg text-sm focus:border-secondary focus:ring-1 focus:ring-secondary transition-colors">
+                        </div>
+                    </div>
 
-                            <div class="space-y-2 mb-4 text-sm text-gray-600">
-                                <p class="flex items-center"><svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>{{ job.location }}</p>
-                                <p class="flex items-center"><svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>Deadline: {{ new Date(job.deadline).toLocaleDateString() }}</p>
-                                <p v-if="job.salary_range" class="flex items-center"><svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>{{ job.salary_range }}</p>
+                    <!-- Category -->
+                    <div>
+                        <label class="font-semibold text-sm text-primary mb-2 block">Category</label>
+                        <select v-model="searchForm.category_id" class="w-full px-3 py-2 bg-slate-50 border border-outline-variant rounded-lg text-sm focus:border-secondary focus:ring-1 focus:ring-secondary transition-colors">
+                            <option value="">All Categories</option>
+                            <option v-for="category in categories" :key="category.id" :value="category.id">
+                                {{ category.name }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Work Type -->
+                    <div>
+                        <label class="font-semibold text-sm text-primary mb-2 block">Work Type</label>
+                        <select v-model="searchForm.type" class="w-full px-3 py-2 bg-slate-50 border border-outline-variant rounded-lg text-sm focus:border-secondary focus:ring-1 focus:ring-secondary transition-colors">
+                            <option value="">All Types</option>
+                            <option value="on-site">On-site</option>
+                            <option value="remote">Remote</option>
+                            <option value="hybrid">Hybrid</option>
+                        </select>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content (Job Listings) -->
+            <section class="flex-1 space-y-4">
+
+                <div v-if="jobs.data.length === 0" class="bg-white p-12 rounded-xl border border-outline shadow-sm text-center">
+                    <span class="material-symbols-outlined text-4xl text-slate-300 mb-3">search_off</span>
+                    <h3 class="font-display text-xl font-bold text-primary">No jobs found</h3>
+                    <p class="text-slate-500 mt-2">Try adjusting your filters or search keywords.</p>
+                </div>
+
+                <!-- Job Card (Horizontal Layout) -->
+                <div v-for="job in jobs.data" :key="job.id" class="bg-white p-6 rounded-xl border border-outline shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row gap-6">
+                    <div class="w-14 h-14 rounded-lg bg-primary-container text-white flex items-center justify-center shrink-0 font-bold text-xl uppercase shadow-inner">
+                        {{ job.employer?.company_name.charAt(0) }}
+                    </div>
+
+                    <div class="flex-1">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                            <h3 class="font-display text-lg font-bold text-primary">{{ job.title }}</h3>
+                            <span v-if="job.salary_range" class="font-bold text-sm text-secondary">{{ job.salary_range }}</span>
+                        </div>
+
+                        <div class="flex flex-wrap gap-x-6 gap-y-2 mb-4">
+                            <div class="flex items-center gap-1.5 text-on-surface-variant text-sm font-medium">
+                                <span class="material-symbols-outlined text-[18px]">business</span>
+                                {{ job.employer?.company_name }}
+                            </div>
+                            <div class="flex items-center gap-1.5 text-on-surface-variant text-sm font-medium">
+                                <span class="material-symbols-outlined text-[18px]">location_on</span>
+                                {{ job.location }}
+                            </div>
+                            <div class="flex items-center gap-1.5 text-on-surface-variant text-sm font-medium">
+                                <span class="material-symbols-outlined text-[18px]">schedule</span>
+                                Deadline: {{ new Date(job.deadline).toLocaleDateString() }}
                             </div>
                         </div>
 
-                        <Link :href="route('candidate.jobs.show', job.id)" class="block w-full text-center px-4 py-2 bg-indigo-50 text-indigo-700 rounded hover:bg-indigo-100 transition font-medium mt-4">
+                        <div class="flex items-center gap-2">
+                            <Badge :type="job.type === 'remote' ? 'success' : (job.type === 'hybrid' ? 'warning' : 'info')" class="capitalize">{{ job.type }}</Badge>
+                            <Badge type="default">{{ job.category?.name || 'Uncategorized' }}</Badge>
+                        </div>
+                    </div>
+
+                    <div class="flex items-end mt-4 md:mt-0">
+                        <Link :href="route('candidate.jobs.show', job.id)" class="w-full md:w-auto bg-secondary text-white px-6 py-2.5 rounded-lg font-semibold hover:opacity-90 active:scale-95 transition-all text-center">
                             View Details
                         </Link>
                     </div>
                 </div>
 
-                <!-- 3. التصفح (Pagination Links) -->
-                <div v-if="jobs.links && jobs.data.length > 0" class="mt-8 flex justify-center">
+                <!-- Pagination -->
+                <div v-if="jobs.links && jobs.data.length > 0" class="flex justify-center pt-8">
                     <div class="flex flex-wrap gap-1">
                         <template v-for="(link, index) in jobs.links" :key="index">
-                            <div v-if="link.url === null" class="px-4 py-2 border rounded text-gray-400 bg-gray-50 text-sm" v-html="link.label"></div>
-                            <Link v-else :href="link.url" class="px-4 py-2 border rounded hover:bg-gray-100 text-sm" :class="{ 'bg-indigo-600 text-white hover:bg-indigo-700 border-indigo-600': link.active }" v-html="link.label"></Link>
+                            <div v-if="link.url === null" class="px-4 py-2 border border-outline-variant rounded-lg text-slate-400 bg-white text-sm" v-html="link.label"></div>
+                            <Link v-else :href="link.url" class="px-4 py-2 border rounded-lg text-sm transition-colors font-medium" :class="{ 'bg-secondary text-white border-secondary': link.active, 'bg-white border-outline-variant text-slate-600 hover:bg-slate-50': !link.active }" v-html="link.label"></Link>
                         </template>
                     </div>
                 </div>
 
-            </div>
+            </section>
         </div>
     </AuthenticatedLayout>
 </template>
