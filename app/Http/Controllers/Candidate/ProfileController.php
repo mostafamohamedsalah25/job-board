@@ -24,6 +24,7 @@ class ProfileController extends Controller
 
     public function update(Request $request)
     {
+        $user = $request->user();
         $validated = $request->validate([
             'phone' => 'nullable|string|max:20',
             'bio' => 'nullable|string|max:1000',
