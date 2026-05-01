@@ -50,6 +50,8 @@ Route::middleware(['auth', 'role:employer'])->prefix('employer')->name('employer
     Route::get('/applications/{applicationId}/checkout', [PaymentController::class, 'checkout'])->name('payments.checkout');
     Route::post('/applications/{applicationId}/pay', [PaymentController::class,'processPayment'])->name('payments.processPayment');
 
+    Route::get('/applications/{applicationId}/payment/success', [PaymentController::class, 'success'])->name('payments.success');
+
 });
 
 Route::middleware(['auth', 'role:candidate'])->prefix('candidate')->name('candidate.')->group(function () {
